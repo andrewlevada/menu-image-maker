@@ -21,7 +21,7 @@ function startBot(): Bot {
 
 	if (isProduction()) {
 		const app = express();
-		app.use(exports.json);
+		app.use(exports.json());
 		app.use(webhookCallback(bot, "express"));
 	} else bot.start().then();
 

@@ -1,0 +1,25 @@
+{
+  "name": "menu-image-maker-bot",
+  "version": "0.0.1",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewlevada/menu-image-maker.git"
+  },
+  "scripts": {
+    "serve": "tsc && cross-env NODE_ENV=development node build/app.js --enable-source-maps",
+    "start": "cross-env NODE_ENV=production node build/app.js --enable-source-maps",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "cross-env": "^7.0.3",
+    "telegraf": "^4.8.3",
+    "telegraf-throttler": "^0.6.0",
+    "typegram": "^3.9.2",
+    "typescript": "^4.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.40"
+  }
+}

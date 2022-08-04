@@ -1,0 +1,8 @@
+build/
+node_modules/
+heroku_mount/
+
+.idea
+
+serviceAccountKey.json
+env_variables.yaml

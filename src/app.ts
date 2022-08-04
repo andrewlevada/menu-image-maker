@@ -1,58 +1,34 @@
 import bindDialog from "./dialog";
-import { Telegraf } from "telegraf";
-import telegrafThrottler from "telegraf-throttler";
-import Bottleneck from "bottleneck";
-import { isProduction, productionUrl } from "./env";
-import { CallbackQuery, Message } from "typegram";
-import TextMessage = Message.TextMessage;
+import { isProduction } from "./env";
+import { Bot, webhookCallback } from "grammy";
+import express from "express";
 
 console.time("Initialization");
 
 process.env.TZ = "Europe/Moscow";
-startBot().then();
+startBot();
+console.timeEnd("Initialization");
+console.log("Started bot!");
 
-function startBot(): Promise<Telegraf> {
+function startBot(): Bot {
 	console.time("Starting bot");
-	const bot = new Telegraf(process.env.TELEGRAM_API_KEY as string);
-
-	bot.use(telegrafThrottler({
-		in: {
-			highWater: 1,
-			maxConcurrent: 1,
-			minTime: 1200,
-			strategy: Bottleneck.strategy.OVERFLOW,
-		},
-		out: {
-			minTime: 20,
-			reservoir: 200,
-			reservoirRefreshAmount: 100,
-			reservoirRefreshInterval: 2000,
-		},
-		inThrottlerError: ctx => {
-			console.log(`Message from ${(ctx.from || ctx.chat)?.id} dropped by throttler.`);
-			return Promise.resolve();
-		},
-	}));
+	const bot = new Bot(process.env.TELEGRAM_API_KEY as string);
 
 	bindLogging(bot);
 	bindDialog(bot);
 
 	console.timeEnd("Starting bot");
 
-	return bot.launch(isProduction() ? {
-		webhook: {
-			hookPath: bot.secretPathComponent(),
-			port: +(process.env.PORT || "8000"),
-		}
-	} : {})
-		.then(() => {
-			console.timeEnd("Initialization");
-			console.log("Started bot!");
-		})
-		.then(() => bot);
+	if (isProduction()) {
+		const app = express();
+		app.use(exports.json);
+		app.use(webhookCallback(bot, "express"));
+	} else bot.start().then();
+
+	return bot;
 }
 
-function bindLogging(bot: Telegraf): void {
+function bindLogging(bot: Bot): void {
 	bot.use((ctx, next) => {
 		if (!ctx.from) {
 			console.log(`Update without .from - ignoring (${JSON.stringify(ctx?.chat)})`);
@@ -61,8 +37,8 @@ function bindLogging(bot: Telegraf): void {
 
 		const userId = ctx.from.id.toString();
 
-		if (ctx.message) console.log(`message from ${userId}: ${(ctx.message as TextMessage).text}`);
-		else if (ctx.callbackQuery) console.log(`query from ${userId}: ${(ctx.callbackQuery as CallbackQuery).data}`);
+		if (ctx.message) console.log(`message from ${userId}: ${ctx.message.text}`);
+		else if (ctx.callbackQuery) console.log(`query from ${userId}: ${ctx.callbackQuery.data}`);
 		else console.log(`use from ${userId}`);
 
 		next().then();

@@ -39,9 +39,12 @@ function startBot(): Promise<Telegraf> {
 
 	console.timeEnd("Starting bot");
 
-	return (isProduction()
-		? bot.telegram.setWebhook(`${productionUrl}/${bot.secretPathComponent()}`)
-		: bot.launch())
+	return bot.launch(isProduction() ? {
+		webhook: {
+			hookPath: bot.secretPathComponent(),
+			port: +(process.env.PORT || "8000"),
+		}
+	} : {})
 		.then(() => {
 			console.timeEnd("Initialization");
 			console.log("Started bot!");

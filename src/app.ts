@@ -23,6 +23,7 @@ function startBot(): Bot {
 		const app = express();
 		app.use(express.json());
 		app.use(webhookCallback(bot, "express"));
+		app.listen(process.env.PORT || 443)
 	} else bot.start().then();
 
 	return bot;

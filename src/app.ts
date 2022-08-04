@@ -1,7 +1,14 @@
 import bindDialog from "./dialog";
 import { isProduction } from "./env";
-import { Bot, webhookCallback } from "grammy";
+import { Bot, Context, session, SessionFlavor, webhookCallback } from "grammy";
 import express from "express";
+
+export type UserLocation = "default" | "creation";
+export interface SessionsData {
+	location: UserLocation;
+}
+
+export type CustomContext = Context & SessionFlavor<SessionsData>
 
 console.time("Initialization");
 
@@ -10,9 +17,11 @@ startBot();
 console.timeEnd("Initialization");
 console.log("Started bot!");
 
-function startBot(): Bot {
+function startBot(): Bot<CustomContext> {
 	console.time("Starting bot");
-	const bot = new Bot(process.env.TELEGRAM_API_KEY as string);
+
+	const bot = new Bot<CustomContext>(process.env.TELEGRAM_API_KEY as string);
+	bot.use(session({ initial: () => ({ location: "default" } as SessionsData)}));
 
 	bindLogging(bot);
 	bindDialog(bot);
@@ -29,7 +38,7 @@ function startBot(): Bot {
 	return bot;
 }
 
-function bindLogging(bot: Bot): void {
+function bindLogging(bot: Bot<CustomContext>): void {
 	bot.use((ctx, next) => {
 		if (!ctx.from) {
 			console.log(`Update without .from - ignoring (${JSON.stringify(ctx?.chat)})`);

@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, InputFile } from "grammy";
 import texts from "./texts";
 import { ReplyKeyboardMarkup } from "@grammyjs/types/markup";
 import { CustomContext } from "./app";
@@ -36,7 +36,7 @@ export default function (bot: Bot<CustomContext>) {
 
 		const blob = await generateImage(text);
 		await ctx.reply("Картинка готова!");
-		await ctx.replyWithPhoto(blob, {
+		await ctx.replyWithPhoto(new InputFile(blob), {
 			reply_markup: defaultKeyboard,
 		});
 	})

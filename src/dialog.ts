@@ -39,5 +39,11 @@ export default function (bot: Bot<CustomContext>) {
 		await ctx.replyWithPhoto(new InputFile(blob), {
 			reply_markup: defaultKeyboard,
 		});
-	})
+	});
+
+
+	// This should be the last middleware
+	bot.on("message:text", ctx => ctx.reply(texts.res.unknown, {
+		reply_markup: defaultKeyboard,
+	}));
 }

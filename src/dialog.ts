@@ -42,6 +42,8 @@ export default function (bot: Bot<CustomContext>) {
 		await ctx.replyWithPhoto(new InputFile(blob), {
 			reply_markup: defaultKeyboard,
 		});
+
+		ctx.session.location = "default";
 	});
 
 

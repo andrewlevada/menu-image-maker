@@ -3,6 +3,7 @@ import texts from "./texts";
 import { ReplyKeyboardMarkup } from "@grammyjs/types/markup";
 import { CustomContext } from "./app";
 import generateImage from "./image-maker";
+import { fixDottedAlignment } from "./menu-decorator";
 
 const defaultKeyboard = {
 	keyboard: [[texts.keys.convertMode]],
@@ -27,12 +28,14 @@ export default function (bot: Bot<CustomContext>) {
 			return;
 		}
 
-		const text = ctx.message.text;
+		let text = ctx.message.text;
 		if (!text) {
 			await ctx.reply(texts.res.creation.error);
 			ctx.session.location = "default";
 			return;
 		}
+
+		text = fixDottedAlignment(text);
 
 		const blob = await generateImage(text);
 		await ctx.reply("Картинка готова!");
